@@ -1,0 +1,8 @@
+{
+    "name": "simple-chat-socket",
+    "version": "0.0.1",
+    "description": "simple socket.io chat app",
+    "dependencies": {
+        "express": "^4.17.1"
+    }
+}
