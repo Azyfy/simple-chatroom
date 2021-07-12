@@ -44,6 +44,16 @@
             window.scrollTo(0, document.body.scrollHeight);
         });
 
+        socket.on('connect-disconnect', function(msg) {
+            const item = document.createElement('li');
+            item.textContent = msg;
+            item.style.color = "blue";
+            item.style.fontStyle = "italic";
+            item.style.fontSize = "small";
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
     </script>
 
   </body>
