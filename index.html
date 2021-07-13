@@ -5,10 +5,16 @@
     <style>
       body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: black; }
 
-      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px);}
       #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
       #input:focus { outline: none; }
       #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+      
+      #display { display: none;}
+
+      #usernameform { margin: auto; width: 50%;  padding: 10px; text-align: center; background-color: rgba(0, 0, 0, 0.15);  }
+      #usernameinput { border: none; padding: 1rem 1rem; border-radius: 2rem; margin: 0.25rem; }
+      #usernameform > button { background: #333; border: none; padding: 0.5rem 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
 
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages > li { padding: 0.5rem 1rem; }
@@ -16,6 +22,8 @@
     
       h1 { text-align: center; color: azure; }  
       #message-container { margin: 5px 25px; background-color: white;}
+    
+      .username { font-size: small; text-decoration: underline; color: crimson; }
     </style>
   </head>
   <body>
@@ -23,8 +31,16 @@
     <div id="message-container" >
         <ul id="messages"></ul>
     </div>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
+    <div id="display" >
+      <form id="form" action="">
+        <input id="input" autocomplete="off" placeholder="Message" /><button>Send</button>
+      </form>
+    </div>
+
+    <form id="usernameform" action="">
+      <input id="usernameinput" autocomplete="off" placeholder="Enter your username" />
+        <br>
+      <button>Submit</button>
     </form>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -32,7 +48,12 @@
         const socket = io();
 
         const form = document.getElementById('form');
+        const userForm = document.getElementById('usernameform');
         const input = document.getElementById('input');
+        const usernameInput = document.getElementById('usernameinput');
+        const display =  document.getElementById('display');
+
+        let users = [];
 
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -42,9 +63,28 @@
             }
         });
 
-        socket.on('chat message', function(msg) {
+        userForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if(users.some( user => user.username === usernameInput.value )) {
+              alert("Username taken")
+              return;
+            }
+            if (usernameInput.value) {
+            socket.username = usernameInput.value
+
+            socket.emit('username', usernameInput.value);
+            userForm.style.display = "none";
+            display.style.display = "block";
+            }
+        });
+
+        socket.on('users', function(usernames) {
+            users = usernames;
+        });
+
+        socket.on('chat message', function(username, msg) {
             const item = document.createElement('li');
-            item.textContent = msg;
+            item.innerHTML = `<span class="username">${username}</span>: ` + msg;
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
         });
